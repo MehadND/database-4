@@ -25,7 +25,7 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 //			exitItem.addActionListener(this);
 
 			// Create an instance of our class JDBCMainWindowContent 
-			JDBCMainWindowContent aWindowContent = new JDBCMainWindowContent("A00273758 - JDBC Assessment");
+			JDBCMainWindowContent aWindowContent = new JDBCMainWindowContent("Premier League DB");
 			// Add the instance to the main section of the window
 			getContentPane().add( aWindowContent );
 

@@ -21,7 +21,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 @SuppressWarnings("serial")
-public class JDBCMainWindowContent extends JInternalFrame implements ActionListener, MouseListener {
+public class JDBCMainWindowContent extends JInternalFrame implements ActionListener, MouseListener
+{
     String cmd = null;
 
     // DB Connectivity Attributes
@@ -89,10 +90,18 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     JLabel headerText = new JLabel("Export Functionality");
     JButton getNationalitiesPerClub = new JButton("Get Nationalities Per Club");
     JButton getGoalsPerAge = new JButton("Get Goals Per Age");
-    Border border = new LineBorder(Color.black, 2);
+    JLabel infoLabel = new JLabel("Info = ");
+
+    Border border;
+    JPanel p = new JPanel();
     ArrayList<JTextField> textFieldArrayList = new ArrayList<>();
 
-    public JDBCMainWindowContent(String windowTitle) {
+        String[] optionsToChoose = {"Everton", "Liverpool"};
+
+        JComboBox<String> jComboBox = new JComboBox<>(optionsToChoose);
+
+    public JDBCMainWindowContent(String windowTitle)
+    {
         // setting up the GUI
         super(windowTitle, false, false, false, false);
         setEnabled(true);
@@ -125,6 +134,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         // creates DB control buttons and adds action listener to them and set button sizes
         settingDBControls();
 
+        content.add(p);
         content.add(exportPanel);
         content.add(dbContentsPanel);
         content.add(crudPanel);
@@ -132,10 +142,13 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         setSize(1280, 720);
         setVisible(true);
 
+        jComboBox.addActionListener(this);
+
         tableModel.refreshFromDB(stmt);
     }
 
-    public void initiate_db_conn() {
+    public void initiate_db_conn()
+    {
         try {
             // Load the JConnector Driver
             Class.forName("com.mysql.jdbc.Driver");
@@ -150,20 +163,21 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         }
     }
 
-    private void settingCrudPanel() {
+    private void settingCrudPanel()
+    {
         buttonGroup.add(genderMale);
         buttonGroup.add(genderFemale);
         buttonGroup.add(genderOther);
 
-        dobTextField.setEditable(false);
-        dobTextField.setText("fUse <i>DOB</i> Selector Button to select a DOB");
+        idTextField.setEditable(false);
 
         crudPanel = new JPanel();
 
         crudPanel.setSize(400, 450);
         crudPanel.setLocation(50, 0);
         crudPanel.setBackground(Color.lightGray);
-        crudPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "CRUD", TitledBorder.CENTER, TitledBorder.CENTER, null, Color.red)));
+        border = new LineBorder(new Color(245, 84, 10), 2);
+        //crudPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "CRUD", TitledBorder.CENTER, TitledBorder.CENTER, null, new Color(2, 139, 250))));
         GridBagLayout gridBagLayout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
         crudPanel.setLayout(gridBagLayout);
@@ -176,13 +190,13 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         genderOther.setBackground(null);
         genderPanel.setBackground(null);
 
-        for (JTextField textField : textFieldArrayList)
-        {
+        for (JTextField textField : textFieldArrayList) {
             textField.setPreferredSize(new Dimension(0, 25));
         }
 
         constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.insets = new Insets(5,0,5,0);
+        constraints.insets = new Insets(5, 0, 5, 0);
+        constraints.anchor = GridBagConstraints.CENTER;
 
         constraints.gridx = 0;
         constraints.gridy = 0;
@@ -225,6 +239,18 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         crudPanel.add(dobTextField);
 
         constraints.gridx = 0;
+        constraints.gridwidth = 2;
+        constraints.insets = new Insets(0, crudPanel.getWidth() / 4, 0, 0);
+        constraints.gridy++;
+        JLabel l = new JLabel("<html><center>Use <font color=#AC56C3>Open DOB</font color>" + " Button to select a " +
+                "DOB</center></html>");
+        //l.setFont(l.getFont().deriveFont(Font.ITALIC, , 12));
+        gridBagLayout.setConstraints(l, constraints);
+        crudPanel.add(l);
+
+        constraints.insets = new Insets(5, 0, 5, 0);
+
+        constraints.gridx = 0;
         constraints.gridy++;
         gridBagLayout.setConstraints(ageLabel, constraints);
         crudPanel.add(ageLabel);
@@ -259,9 +285,9 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         crudPanel.add(clubLabel);
 
         constraints.gridx++;
-        gridBagLayout.setConstraints(clubTextField, constraints);
-        //clubTextField.setPreferredSize(new Dimension(0, 30));
-        crudPanel.add(clubTextField);
+        gridBagLayout.setConstraints(jComboBox, constraints);
+        //jComboBox.setPreferredSize(new Dimension(200, 130));
+        crudPanel.add(jComboBox);
 
         constraints.gridx = 0;
         constraints.gridy++;
@@ -299,47 +325,62 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         dobTextField.addActionListener(this);
     }
 
-    private void settingExportPanel() {
+    private void settingExportPanel()
+    {
+        border = new LineBorder(new Color(2, 139, 250), 2);
+        exportPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "Export Data"
+                , TitledBorder.CENTER, TitledBorder.CENTER, null, new Color(245, 84, 10))));
+
+        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 12));
+
         getNationalitiesPerClub.addActionListener(this);
         getGoalsPerAge.addActionListener(this);
 
-        getNationalitiesPerClub.setPreferredSize(new Dimension(200, 50));
-        getGoalsPerAge.setPreferredSize(new Dimension(200, 50));
-
+        exportPanel.setLayout(new BoxLayout(exportPanel, BoxLayout.Y_AXIS));
         exportPanel.setBackground(null);
-        exportPanel.setSize(300, 150);
-        exportPanel.setLocation(750, 10);
-        exportPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "Export Data", TitledBorder.CENTER, TitledBorder.CENTER, null, Color.red)));
-        //exportPanel.add(headerText);
+        exportPanel.setSize(200, 200);
+        exportPanel.setLocation(800, 10);
         exportPanel.add(getNationalitiesPerClub);
+        exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(getGoalsPerAge);
+        exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
+        exportPanel.add(infoLabel);
+
+        content.add(exportPanel);
     }
 
-    private void settingDBContentPanel() {
+    private void settingDBContentPanel()
+    {
         tableofDBContents.addMouseListener(this);
 
         tableofDBContents.setPreferredScrollableViewportSize(new Dimension(900, 300));
 
         dbContentsPanel = new JScrollPane(tableofDBContents, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         dbContentsPanel.setBackground(Color.lightGray);
 
         dbContentsPanel.setSize(600, 150);
         dbContentsPanel.setLocation(550, 300);
     }
 
-    private void settingDBControls() {
+    private void settingDBControls()
+    {
         insertButton.setSize(100, 30);
         updateButton.setSize(100, 30);
         deleteButton.setSize(100, 30);
         clearButton.setSize(100, 30);
         dobPicker.setSize(100, 30);
 
-        insertButton.setLocation(550, 10);
-        deleteButton.setLocation(550, 60);
-        updateButton.setLocation(550, 110);
-        clearButton.setLocation(550, 160);
-        dobPicker.setLocation(550, 210);
+        //dobPicker.setForeground(new Color(172, 86, 195));
+
+        GridLayout experimentLayout = new GridLayout(5, 0);
+        experimentLayout.setVgap(5);
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setBackground(null);
+        p.setSize(200, 260);
+        p.setLocation(550, 25);
+//        p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "Export Data",
+//                TitledBorder.CENTER, TitledBorder.CENTER, null, Color.red)));
 
         insertButton.addActionListener(this);
         updateButton.addActionListener(this);
@@ -347,16 +388,28 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         clearButton.addActionListener(this);
         dobPicker.addActionListener(this);
 
-        content.add(insertButton);
-        content.add(updateButton);
-        content.add(deleteButton);
-        content.add(clearButton);
-        content.add(dobPicker);
+        p.add(insertButton);
+        p.add(Box.createRigidArea(new Dimension(0, 15)));
+        p.add(updateButton);
+        p.add(Box.createRigidArea(new Dimension(0, 15)));
+        p.add(deleteButton);
+        p.add(Box.createRigidArea(new Dimension(0, 15)));
+        p.add(clearButton);
+        p.add(Box.createRigidArea(new Dimension(0, 15)));
+        p.add(dobPicker);
+        p.add(Box.createRigidArea(new Dimension(0, 15)));
+        p.add(new JLabel("<html><h3>Note: Select player_id to fill the textfields.</h3></html>"));
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e)
+    {
         Object target = e.getSource();
+
+        if(target == jComboBox)
+        {
+            System.out.println(jComboBox.getItemAt(jComboBox.getSelectedIndex()));
+        }
 
         // open calendar on 'open DOB' button and sets DOB date in DOB text-field
         if (target == dobPicker) {
@@ -368,10 +421,12 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
             SimpleDateFormat dcn = new SimpleDateFormat("yyyy");
             SimpleDateFormat actualFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-            calendar.addPropertyChangeListener(new PropertyChangeListener() {
+            calendar.addPropertyChangeListener(new PropertyChangeListener()
+            {
 
                 @Override
-                public void propertyChange(PropertyChangeEvent evt) {
+                public void propertyChange(PropertyChangeEvent evt)
+                {
                     // TODO Auto-generated method stub
                     date = dcn.format(calendar.getDate());
                     label.setText(date.toString());
@@ -382,9 +437,9 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                     LocalDateTime now = LocalDateTime.now();
                     String nowDate = dtf.format(now);
                     date = date.replaceAll("[^a-zA-Z0-9]", "");
-                    System.out.println(date);
+                    //System.out.println(date);
                     int age = Integer.parseInt(nowDate) - Integer.parseInt(date);
-                    System.out.println(age);
+                    //System.out.println(age);
                     ageSpinner.setValue(age);
                 }
             });
@@ -422,7 +477,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         }
     }
 
-    private void updateQuery() {
+    private void updateQuery()
+    {
         String updateTemp = "";
         try {
 
@@ -430,7 +486,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 updateTemp = "UPDATE players SET " + "firstName = '" + firstNameTextField.getText()
                         + "', lastName = '" + lastNameTextField.getText() + "', age = " + ageSpinner.getValue()
                         + ", gender ='F'" + ", dob = '" + dobTextField.getText() + "', nationality = '"
-                        + nationalityTextField.getText() + "', club = '" + clubTextField.getText()
+                        + nationalityTextField.getText() + "', club = '" + jComboBox.getItemAt(jComboBox.getSelectedIndex())
                         + "', appearances = " + appearancesTextField.getText() + ", goals = "
                         + goalsTextField.getText() + ", assists = " + assistsTextField.getText()
                         + " where player_id = " + idTextField.getText() + ";";
@@ -440,7 +496,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 updateTemp = "UPDATE players SET " + "firstName = '" + firstNameTextField.getText()
                         + "', lastName = '" + lastNameTextField.getText() + "', age = " + ageSpinner.getValue()
                         + ", gender ='M'" + ", dob = '" + dobTextField.getText() + "', nationality = '"
-                        + nationalityTextField.getText() + "', club = '" + clubTextField.getText()
+                        + nationalityTextField.getText() + "', club = '" + jComboBox.getItemAt(jComboBox.getSelectedIndex())
                         + "', appearances = " + appearancesTextField.getText() + ", goals = "
                         + goalsTextField.getText() + ", assists = " + assistsTextField.getText()
                         + " where player_id = " + idTextField.getText() + ";";
@@ -450,7 +506,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 updateTemp = "UPDATE players SET " + "firstName = '" + firstNameTextField.getText()
                         + "', lastName = '" + lastNameTextField.getText() + "', age = " + ageSpinner.getValue()
                         + ", gender ='O'" + ", dob = '" + dobTextField.getText() + "', nationality = '"
-                        + nationalityTextField.getText() + "', club = '" + clubTextField.getText()
+                        + nationalityTextField.getText() + "', club = '" + jComboBox.getItemAt(jComboBox.getSelectedIndex())
                         + "', appearances = " + appearancesTextField.getText() + ", goals = "
                         + goalsTextField.getText() + ", assists = " + assistsTextField.getText()
                         + " where player_id = " + idTextField.getText() + ";";
@@ -472,7 +528,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         clearFields();  // clears all input-based components
     }
 
-    private void deleteQuery() {
+    private void deleteQuery()
+    {
         try {
             String updateTemp = "DELETE FROM players WHERE player_id = " + idTextField.getText() + ";";
             stmt.executeUpdate(updateTemp);
@@ -492,14 +549,15 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         clearFields();  // clears all input-based components
     }
 
-    private void insertQuery() {
+    private void insertQuery()
+    {
         String updateTemp = "";
         try {
             if (genderFemale.isSelected() == true) {
                 updateTemp = "INSERT INTO players VALUES(" + null + ", '" + firstNameTextField.getText() + "', "
                         + "'" + lastNameTextField.getText() + "', " + ageSpinner.getValue() + ", " + "'F', " + "'"
                         + dobTextField.getText() + "', " + "'" + nationalityTextField.getText() + "', " + "'"
-                        + clubTextField.getText() + "', " + appearancesTextField.getText() + ", "
+                        + jComboBox.getItemAt(jComboBox.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
                         + goalsTextField.getText() + ", " + assistsTextField.getText() + ");";
             }
 
@@ -507,7 +565,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 updateTemp = "INSERT INTO players VALUES(" + null + ", '" + firstNameTextField.getText() + "', "
                         + "'" + lastNameTextField.getText() + "', " + ageSpinner.getValue() + ", " + "'M', " + "'"
                         + dobTextField.getText() + "', " + "'" + nationalityTextField.getText() + "', " + "'"
-                        + clubTextField.getText() + "', " + appearancesTextField.getText() + ", "
+                        + jComboBox.getItemAt(jComboBox.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
                         + goalsTextField.getText() + ", " + assistsTextField.getText() + ");";
             }
 
@@ -515,7 +573,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 updateTemp = "INSERT INTO players VALUES(" + null + ", '" + firstNameTextField.getText() + "', "
                         + "'" + lastNameTextField.getText() + "', " + ageSpinner.getValue() + ", " + "'O', " + "'"
                         + dobTextField.getText() + "', " + "'" + nationalityTextField.getText() + "', " + "'"
-                        + clubTextField.getText() + "', " + appearancesTextField.getText() + ", "
+                        + jComboBox.getItemAt(jComboBox.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
                         + goalsTextField.getText() + ", " + assistsTextField.getText() + ");";
             }
 
@@ -535,7 +593,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         clearFields();  // clears all input-based components
     }
 
-    private void clearFields() {
+    private void clearFields()
+    {
         idTextField.setText("");
         firstNameTextField.setText("");
         lastNameTextField.setText("");
@@ -550,10 +609,11 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         appearancesTextField.setText("");
         goalsTextField.setText("");
         assistsTextField.setText("");
-
+        infoLabel.setText("Info = ");
     }
 
-    private void printDB() throws SQLException {
+    private void printDB() throws SQLException
+    {
         rs = stmt.executeQuery("SELECT * from players");
 
         System.out.println(" ");
@@ -577,37 +637,41 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
      * 2. Goals, Assists and Age in 1 csv file, use charts to show total goals scored or assists per age.
      */
 
-    private void GetNationalitiesPerClub() {
+    private void GetNationalitiesPerClub()
+    {
         cmd = "select club, count(nationality) from players group by club;";
 
         try {
             rs = stmt.executeQuery(cmd);
             writeToFile(rs, "ExportData1");
-            while (rs.next()) {
-                System.out.println(rs.getString("club") + " = " + rs.getString("count(nationality)"));
-            }
+//            while (rs.next()) {
+//                System.out.println(rs.getString("club") + " = " + rs.getString("count(nationality)"));
+//            }
         } catch (Exception e1) {
             e1.printStackTrace();
         }
     }
 
-    private void GetGoalsPerAge() {
+    private void GetGoalsPerAge()
+    {
         cmd = "select age, count(goals) from players group by age;";
 
         try {
             rs = stmt.executeQuery(cmd);
             writeToFile(rs, "ExportData2");
-            while (rs.next()) {
-                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
-            }
+//            while (rs.next()) {
+//                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
+//            }
         } catch (Exception e1) {
             e1.printStackTrace();
         }
     }
 
-    private void writeToFile(ResultSet rs, String fileName) {
+    private void writeToFile(ResultSet rs, String fileName)
+    {
         try {
-            System.out.println("writing to csv file...");
+            //System.out.println("writing to csv file...");
+            infoLabel.setText("Info = writing to csv file...");
             FileWriter outputFile = new FileWriter("Export Data/" + fileName + ".csv");
             PrintWriter printWriter = new PrintWriter(outputFile);
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -625,24 +689,28 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 printWriter.flush();
             }
             printWriter.close();
-            System.out.println("writing to csv file...DONE");
+            //System.out.println("writing to csv file...DONE");
+            infoLabel.setText("Info = writing to csv file...DONE");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent e)
+    {
 
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent e)
+    {
 
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent e)
+    {
 
         // fills text-fields when clicked on an id column in db table
 
@@ -659,7 +727,18 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 genderOther.setSelected(true);
             dobTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 5).toString());
             nationalityTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 6).toString());
-            clubTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 7).toString());
+            String s = tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 7).toString();
+
+            for (int i = 0; i <=optionsToChoose.length-1; i++)
+            {
+                if(s.equals(optionsToChoose[i]))
+                {
+                    System.out.println("YES!! SAME");
+                    jComboBox.setSelectedIndex(i);
+                }
+            }
+
+
             appearancesTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 8).toString());
             goalsTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 9).toString());
             assistsTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 10).toString());
@@ -669,12 +748,14 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent e)
+    {
 
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent e)
+    {
 
     }
 }
