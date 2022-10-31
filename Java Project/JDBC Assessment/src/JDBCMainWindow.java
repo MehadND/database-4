@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class JDBCMainWindow extends JFrame implements ActionListener
@@ -57,7 +58,7 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 				System.out.println("Open Chart Frame For Data 1 - Get Nationalities Per Club");
 				try {
 					aWindowContent.openData1Frame();
-				} catch (SQLException ex) {
+				} catch (SQLException | IOException ex) {
 					throw new RuntimeException(ex);
 				}
 			}
@@ -67,7 +68,7 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 				System.out.println("Open Chart Frame For Data 2 - Get Goals Per Age");
 				try {
 					aWindowContent.openData2Frame();
-				} catch (SQLException ex) {
+				} catch (SQLException | IOException ex) {
 					throw new RuntimeException(ex);
 				}
 			}

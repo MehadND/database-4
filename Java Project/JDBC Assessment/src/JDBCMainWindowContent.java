@@ -1,6 +1,7 @@
 import com.toedter.calendar.JCalendar;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -32,7 +33,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -112,6 +115,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     JButton getGoalsPerAge = new JButton("Get Goals Per Age");
     JLabel infoLabel = new JLabel("Info = ");
     JButton getTopScorer = new JButton("Get Top Scorer");
+    private JTextField topScorerTextField = new JTextField(20);
 
     Border border;
     JPanel p = new JPanel();
@@ -357,6 +361,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         exportPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "Export Data"
                 , TitledBorder.CENTER, TitledBorder.CENTER, null, new Color(245, 84, 10))));
 
+        topScorerTextField.setEditable(false);
         infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 12));
 
         getNationalitiesPerClub.addActionListener(this);
@@ -365,13 +370,15 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
         exportPanel.setLayout(new BoxLayout(exportPanel, BoxLayout.Y_AXIS));
         exportPanel.setBackground(null);
-        exportPanel.setSize(200, 200);
+        exportPanel.setSize(200, 250);
         exportPanel.setLocation(800, 10);
         exportPanel.add(getNationalitiesPerClub);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(getGoalsPerAge);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(getTopScorer);
+        exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
+        exportPanel.add(topScorerTextField);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(infoLabel);
 
@@ -523,7 +530,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 //        return dataset;
 //    }
 
-    public void openData1Frame() throws SQLException
+    public void openData1Frame() throws SQLException, IOException
     {
         JFrame frame = new JFrame();
 
@@ -552,9 +559,14 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         frame.setSize(700, 500);
         frame.setLocation(content.getWidth(), content.getHeight());
         frame.setVisible(true);
+
+        int width = 560;    /* Width of the image */
+        int height = 370;   /* Height of the image */
+        File pieChart = new File( "Data 1.jpeg" );
+        ChartUtilities.saveChartAsJPEG( pieChart , chart , width , height );
     }
 
-    public void openData2Frame() throws SQLException
+    public void openData2Frame() throws SQLException, IOException
     {
         JFrame frame = new JFrame();
 
@@ -578,14 +590,16 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         ChartPanel chartPanel = new ChartPanel(chart);
         PiePlot3D plot = (PiePlot3D) chart.getPlot();
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
-        plot.setStartAngle( 30 );
-        plot.setForegroundAlpha( 0.50f );
-        plot.setInteriorGap( 0.1 );
         chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
         frame.add(chartPanel);
         frame.setSize(700, 500);
         frame.setLocation(content.getWidth(), content.getHeight());
         frame.setVisible(true);
+
+        int width = 560;    /* Width of the image */
+        int height = 370;   /* Height of the image */
+        File pieChart = new File( "Data 2.jpeg" );
+        ChartUtilities.saveChartAsJPEG( pieChart , chart , width , height );
     }
 
     @Override
@@ -602,6 +616,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                     System.out.println("FirstName = "+rs.getString("firstName"));
                     System.out.println("LastName = "+rs.getString("lastName"));
                     System.out.println("Goals Scored = "+rs.getString("goals"));
+                    topScorerTextField.setText(rs.getString("firstName") + " " + rs.getString("lastName") + " (" + rs.getString("goals") + ")");
                 }
 
             } catch (SQLException sqle) {
