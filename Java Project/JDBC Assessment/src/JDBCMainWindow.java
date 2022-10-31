@@ -1,38 +1,47 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 public class JDBCMainWindow extends JFrame implements ActionListener
 	{
-		//private JMenuItem exitItem;
+		// Create an instance of our class JDBCMainWindowContent
+		JDBCMainWindowContent aWindowContent = new JDBCMainWindowContent("Premier League DB");
+		private JMenuItem exitItem;
+		private JMenuItem data1Item;
+		private JMenuItem data2Item;
 
 		public JDBCMainWindow()
 		{
 			// Sets the Window Title
 			super( "A00273758 - JDBC Assessment" );
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
-			
-			//Setup fileMenu and its elements
-//			JMenuBar menuBar=new JMenuBar();
-//			JMenu fileMenu=new JMenu("File");
-//			exitItem =new JMenuItem("Exit");
-	
-//			fileMenu.add(exitItem);
-//			menuBar.add(fileMenu );
-//			setJMenuBar(menuBar);
-			
-			// Add a listener to the Exit Menu Item
-//			exitItem.addActionListener(this);
 
-			// Create an instance of our class JDBCMainWindowContent 
-			JDBCMainWindowContent aWindowContent = new JDBCMainWindowContent("Premier League DB");
+			//Setup fileMenu and its elements
+			JMenuBar menuBar=new JMenuBar();
+			exitItem =new JMenuItem("Exit");
+
+			JMenu viewMenu=new JMenu("View");
+			data1Item =new JMenuItem("Data 1 Chart");
+			data2Item =new JMenuItem("Data 2 Chart");
+
+			viewMenu.add(data1Item);
+			viewMenu.add(data2Item);
+			menuBar.add(viewMenu );
+			setJMenuBar(menuBar);
+
+			// Add a listener to the Exit Menu Item
+			exitItem.addActionListener(this);
+			data1Item.addActionListener(this);
+			data2Item.addActionListener(this);
+
 			// Add the instance to the main section of the window
 			getContentPane().add( aWindowContent );
 
 			//Content content = new Content("Mehad Nadeem - JDBC Project");
 			//getContentPane().add( content );
 			
-			setSize( 1200, 550 );
+			setSize( 1200, 600 );
 			setVisible( true );
 		}
 		
@@ -42,6 +51,26 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 //			if(e.getSource().equals(exitItem)){
 //				this.dispose();
 //			}
+
+			if(e.getSource() == data1Item)
+			{
+				System.out.println("Open Chart Frame For Data 1 - Get Nationalities Per Club");
+				try {
+					aWindowContent.openData1Frame();
+				} catch (SQLException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+
+			if(e.getSource() == data2Item)
+			{
+				System.out.println("Open Chart Frame For Data 2 - Get Goals Per Age");
+				try {
+					aWindowContent.openData2Frame();
+				} catch (SQLException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
 		}
 		
 		

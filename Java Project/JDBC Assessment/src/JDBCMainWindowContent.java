@@ -1,4 +1,24 @@
 import com.toedter.calendar.JCalendar;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.data.Range;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.ui.TextAnchor;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -91,14 +111,20 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     JButton getNationalitiesPerClub = new JButton("Get Nationalities Per Club");
     JButton getGoalsPerAge = new JButton("Get Goals Per Age");
     JLabel infoLabel = new JLabel("Info = ");
+    JButton getTopScorer = new JButton("Get Top Scorer");
 
     Border border;
     JPanel p = new JPanel();
     ArrayList<JTextField> textFieldArrayList = new ArrayList<>();
 
-        String[] optionsToChoose = {"Everton", "Liverpool"};
+    String[] optionsToChoose = {"AFC Bournemouth", "Arsenal", "Aston Villa", "Brentford", "Brighton & Hove " +
+            "Albion", "Chelsea", "Crystal Palace", "Everton", "Fulham", "Leeds United", "Leicester City",
+            "Liverpool", "Manchester City",
+            "Manchester United",
+            "Newcastle United", "Nottingham Forest", "Southampton",
+            "Tottenham Hotspur", "West Ham United", "Wolves"};
 
-        JComboBox<String> jComboBox = new JComboBox<>(optionsToChoose);
+    JComboBox<String> jComboBox = new JComboBox<>(optionsToChoose);
 
     public JDBCMainWindowContent(String windowTitle)
     {
@@ -335,6 +361,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
         getNationalitiesPerClub.addActionListener(this);
         getGoalsPerAge.addActionListener(this);
+        getTopScorer.addActionListener(this);
 
         exportPanel.setLayout(new BoxLayout(exportPanel, BoxLayout.Y_AXIS));
         exportPanel.setBackground(null);
@@ -343,6 +370,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         exportPanel.add(getNationalitiesPerClub);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(getGoalsPerAge);
+        exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
+        exportPanel.add(getTopScorer);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(infoLabel);
 
@@ -401,13 +430,188 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         p.add(new JLabel("<html><h3>Note: Select player_id to fill the textfields.</h3></html>"));
     }
 
+//    private CategoryDataset createDatasetForData1() throws SQLException
+//    {
+//        final String fiat = "FIAT";
+//        final String audi = "AUDI";
+//        final String ford = "FORD";
+//        final String club = "Club";
+//        final String millage = "Millage";
+//        final String userrating = "User Rating";
+//        final String safety = "safety";
+//        final DefaultCategoryDataset dataset =
+//                new DefaultCategoryDataset();
+//
+//        ArrayList<String> listOfClubs = new ArrayList<>();
+//
+//        cmd = "select club from players;";
+//
+//        try {
+//            rs = stmt.executeQuery(cmd);
+//            while (rs.next()) {
+//                listOfClubs.add(rs.getString("club"));
+//            }
+////            while (rs.next()) {
+////                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
+////            }
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+//
+//
+//        cmd = "select club, count(nationality) from players group by club;";
+//        int count = 0;
+//
+//        try {
+//            rs = stmt.executeQuery(cmd);
+//            while (rs.next()) {
+//                count = Integer.parseInt(rs.getString("count(nationality)"));
+//                System.out.println(count);
+//                dataset.addValue(count, rs.getString("club"), club);
+//            }
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+//
+//
+//        return dataset;
+//    }
+//
+//    private CategoryDataset createDatasetForData2() throws SQLException
+//    {
+//        final String fiat = "FIAT";
+//        final String audi = "AUDI";
+//        final String ford = "FORD";
+//        final String playerAge = "Player Age";
+//        final String millage = "Millage";
+//        final String userrating = "User Rating";
+//        final String safety = "safety";
+//        final DefaultCategoryDataset dataset =
+//                new DefaultCategoryDataset();
+//
+//        ArrayList<String> listOfClubs = new ArrayList<>();
+//
+//        cmd = "select age from players;";
+//
+//        try {
+//            rs = stmt.executeQuery(cmd);
+//            while (rs.next()) {
+//                listOfClubs.add(rs.getString("age"));
+//            }
+////            while (rs.next()) {
+////                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
+////            }
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+//
+//
+//        cmd = "select age, goals from players group by age;";
+//        int count = 0;
+//
+//        try {
+//            rs = stmt.executeQuery(cmd);
+//            while (rs.next()) {
+//                count = Integer.parseInt(rs.getString("goals"));
+//                System.out.println(rs.getString("goals") + " = " +  rs.getString("age"));
+//                dataset.addValue(count, rs.getString("age"), playerAge);
+//            }
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+//
+//        return dataset;
+//    }
+
+    public void openData1Frame() throws SQLException
+    {
+        JFrame frame = new JFrame();
+
+        Statement statement = con.createStatement( );
+        ResultSet resultSet = statement.executeQuery("select club, count(nationality) from players group by club;" );
+        DefaultPieDataset dataset = new DefaultPieDataset( );
+
+        while( resultSet.next( ) ) {
+            dataset.setValue(
+                    resultSet.getString( "club" ) ,
+                    Double.parseDouble( resultSet.getString( "count(nationality)" ))
+            );
+        }
+//        PieSectionLabelGenerator labelGenerator = new StandardPieSectionLabelGenerator("{0} = {1}");
+        JFreeChart chart = ChartFactory.createPieChart(
+                "Nationalities Per Club",   // chart title
+                dataset,          // data
+                true,             // include legend
+                true,
+                false );
+        ChartPanel chartPanel = new ChartPanel(chart);
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
+        chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
+        frame.add(chartPanel);
+        frame.setSize(700, 500);
+        frame.setLocation(content.getWidth(), content.getHeight());
+        frame.setVisible(true);
+    }
+
+    public void openData2Frame() throws SQLException
+    {
+        JFrame frame = new JFrame();
+
+        Statement statement = con.createStatement( );
+        ResultSet resultSet = statement.executeQuery("select age, goals from players group by age;" );
+        DefaultPieDataset dataset = new DefaultPieDataset( );
+
+        while( resultSet.next( ) ) {
+            dataset.setValue(
+                    resultSet.getString( "age" ) ,
+                    Double.parseDouble( resultSet.getString( "goals" ))
+            );
+        }
+//        PieSectionLabelGenerator labelGenerator = new StandardPieSectionLabelGenerator("{0} = {1}");
+        JFreeChart chart = ChartFactory.createPieChart3D(
+                "Goals Per Age",   // chart title
+                dataset,          // data
+                true,             // include legend
+                true,
+                false );
+        ChartPanel chartPanel = new ChartPanel(chart);
+        PiePlot3D plot = (PiePlot3D) chart.getPlot();
+        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
+        plot.setStartAngle( 30 );
+        plot.setForegroundAlpha( 0.50f );
+        plot.setInteriorGap( 0.1 );
+        chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
+        frame.add(chartPanel);
+        frame.setSize(700, 500);
+        frame.setLocation(content.getWidth(), content.getHeight());
+        frame.setVisible(true);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e)
     {
         Object target = e.getSource();
 
-        if(target == jComboBox)
-        {
+        if (target == getTopScorer) {
+            try {
+                String updateTemp = "call spGetTopScorer();";
+                rs = stmt.executeQuery(updateTemp);
+                while(rs.next())
+                {
+                    System.out.println("FirstName = "+rs.getString("firstName"));
+                    System.out.println("LastName = "+rs.getString("lastName"));
+                    System.out.println("Goals Scored = "+rs.getString("goals"));
+                }
+
+            } catch (SQLException sqle) {
+                System.err.println("Error with delete:\n" + sqle.toString());
+            } finally {
+                tableModel.refreshFromDB(stmt);
+            }
+        }
+
+        if (target == jComboBox) {
             System.out.println(jComboBox.getItemAt(jComboBox.getSelectedIndex()));
         }
 
@@ -614,7 +818,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
     private void printDB() throws SQLException
     {
-        rs = stmt.executeQuery("SELECT * from players");
+        rs = stmt.executeQuery("call spGetTopScorer();");
 
         System.out.println(" ");
 
@@ -729,10 +933,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
             nationalityTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 6).toString());
             String s = tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 7).toString();
 
-            for (int i = 0; i <=optionsToChoose.length-1; i++)
-            {
-                if(s.equals(optionsToChoose[i]))
-                {
+            for (int i = 0; i <= optionsToChoose.length - 1; i++) {
+                if (s.equals(optionsToChoose[i])) {
                     System.out.println("YES!! SAME");
                     jComboBox.setSelectedIndex(i);
                 }
