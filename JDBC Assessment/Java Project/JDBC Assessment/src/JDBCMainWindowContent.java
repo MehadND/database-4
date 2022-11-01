@@ -188,6 +188,56 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         }
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+        Object target = e.getSource();
+
+        if (target == topScorerButton)
+        {
+            getTopScorer();
+        }
+
+//        if (target == clubDropdownMenu)
+//        {
+//            System.out.println(clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex()));
+//        }
+
+        // open calendar on 'open DOB' button and sets DOB dobDate in DOB text-field
+        if (target == dobPicker)
+        {
+            openDOBPicker();
+        }
+
+        if (target == nationalitiesPerClubButton)
+        {
+            GetNationalitiesPerClub();
+        }
+
+        if (target == goalsPerAgeButton)
+        {
+            GetGoalsPerAge();
+        }
+
+        if (target == clearButton)
+        {
+            clearFields();  // clears all fields to default value
+        }
+
+        if (target == insertButton)
+        {
+            insertQuery();  // method that runs insert query
+        }
+        if (target == deleteButton)
+        {
+            deleteQuery();  // method that runs delete query
+        }
+        if (target == updateButton)
+        {
+            updateQuery();  // method that runs the update query
+        }
+    }
+
     private void settingCrudPanel()
     {
         buttonGroup.add(genderMale);
@@ -462,8 +512,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         frame.setLocation(content.getWidth(), content.getHeight());
         frame.setVisible(true);
 
-
-
+        // allows user to choose where to save the jpeg file
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Specify a file to save");
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpeg"));
@@ -512,6 +561,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         frame.setLocation(content.getWidth(), content.getHeight());
         frame.setVisible(true);
 
+        // allows user to choose where to save the jpeg file
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Specify a file to save");
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpeg"));
@@ -527,56 +577,6 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
             ChartUtilities.saveChartAsJPEG(fileToSave, chart, width, height);    // saves chart as jpeg file
         }
 
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e)
-    {
-        Object target = e.getSource();
-
-        if (target == topScorerButton)
-        {
-            getTopScorer();
-        }
-
-        if (target == clubDropdownMenu)
-        {
-            System.out.println(clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex()));
-        }
-
-        // open calendar on 'open DOB' button and sets DOB dobDate in DOB text-field
-        if (target == dobPicker)
-        {
-            openDOBPicker();
-        }
-
-        if (target == nationalitiesPerClubButton)
-        {
-            GetNationalitiesPerClub();
-        }
-
-        if (target == goalsPerAgeButton)
-        {
-            GetGoalsPerAge();
-        }
-
-        if (target == clearButton)
-        {
-            clearFields();  // clears all fields to default value
-        }
-
-        if (target == insertButton)
-        {
-            insertQuery();  // method that runs insert query
-        }
-        if (target == deleteButton)
-        {
-            deleteQuery();  // method that runs delete query
-        }
-        if (target == updateButton)
-        {
-            updateQuery();  // method that runs the update query
-        }
     }
 
     private void openDOBPicker()
@@ -842,7 +842,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
             FileWriter outputFile = null;
 
 
-
+            // allows user to choose where to save the csv file
             fileChooser.setDialogTitle("Specify a file to save");
             fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV File", ".csv"));
 
