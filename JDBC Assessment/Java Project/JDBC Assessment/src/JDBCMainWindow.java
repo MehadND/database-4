@@ -23,8 +23,8 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 			exitItem =new JMenuItem("Exit");
 
 			JMenu viewMenu=new JMenu("View");
-			data1Item =new JMenuItem("Data 1 Chart");
-			data2Item =new JMenuItem("Data 2 Chart");
+			data1Item =new JMenuItem("Open Chart For Get Nationalities Per Club");
+			data2Item =new JMenuItem("Open Chart For Get Goals Per Age");
 
 			viewMenu.add(data1Item);
 			viewMenu.add(data2Item);
@@ -57,7 +57,7 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 			{
 				System.out.println("Open Chart Frame For Data 1 - Get Nationalities Per Club");
 				try {
-					aWindowContent.openData1Frame();
+					aWindowContent.openNationalitiesPerClubChart();
 				} catch (SQLException | IOException ex) {
 					throw new RuntimeException(ex);
 				}
@@ -67,7 +67,7 @@ public class JDBCMainWindow extends JFrame implements ActionListener
 			{
 				System.out.println("Open Chart Frame For Data 2 - Get Goals Per Age");
 				try {
-					aWindowContent.openData2Frame();
+					aWindowContent.openGoalsPerAgeChart();
 				} catch (SQLException | IOException ex) {
 					throw new RuntimeException(ex);
 				}

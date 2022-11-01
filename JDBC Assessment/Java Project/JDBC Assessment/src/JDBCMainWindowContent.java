@@ -26,6 +26,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,14 +73,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     private JTextField idTextField = new JTextField(20);
     private JTextField firstNameTextField = new JTextField(20);
     private JTextField lastNameTextField = new JTextField(20);
-    // private JTextField ageTextField = new JTextField(20);
-    SpinnerModel value = new SpinnerNumberModel(18, // initial value
-            15, // minimum value
-            100, // maximum value
-            1); // step
+    SpinnerModel value = new SpinnerNumberModel(18, 15, 100, 1);
     private JSpinner ageSpinner = new JSpinner(value);
-
-    // private JTextField genderTextField = new JTextField(20);
     private JRadioButton genderMale = new JRadioButton("Male");
     private JRadioButton genderFemale = new JRadioButton("Female");
     private JRadioButton genderOther = new JRadioButton("Other");
@@ -87,7 +82,14 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     private JPanel genderPanel = new JPanel();
     private JTextField dobTextField = new JTextField(20);
     private JTextField nationalityTextField = new JTextField(20);
-    private JTextField clubTextField = new JTextField(20);
+    String[] clubs = {"AFC Bournemouth", "Arsenal", "Aston Villa", "Brentford", "Brighton & Hove " +
+            "Albion", "Chelsea", "Crystal Palace", "Everton", "Fulham", "Leeds United", "Leicester City",
+            "Liverpool", "Manchester City",
+            "Manchester United",
+            "Newcastle United", "Nottingham Forest", "Southampton",
+            "Tottenham Hotspur", "West Ham United", "Wolves"};
+
+    JComboBox<String> clubDropdownMenu = new JComboBox<>(clubs);    // dropdown menu for selecting clubs
     private JTextField appearancesTextField = new JTextField(20);
     private JTextField goalsTextField = new JTextField(20);
     private JTextField assistsTextField = new JTextField(20);
@@ -104,31 +106,23 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     private JButton clearButton = new JButton("Clear");
     private JButton dobPicker = new JButton("Open DOB");
 
-    String date = "";
+    String dobDate = "";
 
     private JScrollPane dbContentsPanel;
 
     // Export Panel components
     JPanel exportPanel = new JPanel();
     JLabel headerText = new JLabel("Export Functionality");
-    JButton getNationalitiesPerClub = new JButton("Get Nationalities Per Club");
-    JButton getGoalsPerAge = new JButton("Get Goals Per Age");
+    JButton nationalitiesPerClubButton = new JButton("Get Nationalities Per Club");
+    JButton goalsPerAgeButton = new JButton("Get Goals Per Age");
     JLabel infoLabel = new JLabel("Info = ");
-    JButton getTopScorer = new JButton("Get Top Scorer");
+    JButton topScorerButton = new JButton("Get Top Scorer");
     private JTextField topScorerTextField = new JTextField(20);
 
-    Border border;
-    JPanel p = new JPanel();
-    ArrayList<JTextField> textFieldArrayList = new ArrayList<>();
+    Border exportPanelBorder;
+    JPanel crudButtonPanel = new JPanel();
+    ArrayList<JTextField> textFieldArrayList = new ArrayList<>();   // used for setting width + height of all textfields in crudPanel
 
-    String[] optionsToChoose = {"AFC Bournemouth", "Arsenal", "Aston Villa", "Brentford", "Brighton & Hove " +
-            "Albion", "Chelsea", "Crystal Palace", "Everton", "Fulham", "Leeds United", "Leicester City",
-            "Liverpool", "Manchester City",
-            "Manchester United",
-            "Newcastle United", "Nottingham Forest", "Southampton",
-            "Tottenham Hotspur", "West Ham United", "Wolves"};
-
-    JComboBox<String> jComboBox = new JComboBox<>(optionsToChoose);
 
     public JDBCMainWindowContent(String windowTitle)
     {
@@ -148,9 +142,10 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         textFieldArrayList.add(dobTextField);
         textFieldArrayList.add(nationalityTextField);
         textFieldArrayList.add(appearancesTextField);
-        textFieldArrayList.add(clubTextField);
         textFieldArrayList.add(goalsTextField);
         textFieldArrayList.add(assistsTextField);
+
+        clubDropdownMenu.addActionListener(this);
 
         // setup crud panel and add the components to it
         settingCrudPanel();
@@ -164,7 +159,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         // creates DB control buttons and adds action listener to them and set button sizes
         settingDBControls();
 
-        content.add(p);
+        content.add(crudButtonPanel);
         content.add(exportPanel);
         content.add(dbContentsPanel);
         content.add(crudPanel);
@@ -172,23 +167,23 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         setSize(1280, 720);
         setVisible(true);
 
-        jComboBox.addActionListener(this);
-
         tableModel.refreshFromDB(stmt);
     }
 
     public void initiate_db_conn()
     {
-        try {
+        try
+        {
             // Load the JConnector Driver
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             // Specify the DB Name
             String url = "jdbc:mysql://127.0.0.1:3307/db_football";
             // Connect to DB using DB URL, Username and password
             con = DriverManager.getConnection(url, "root", "");
             // Create a generic statement which is passed to the TestInternalFrame1
             stmt = con.createStatement();
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             System.out.println("Error: Failed to connect to database\n" + e.getMessage());
         }
     }
@@ -206,8 +201,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         crudPanel.setSize(400, 450);
         crudPanel.setLocation(50, 0);
         crudPanel.setBackground(Color.lightGray);
-        border = new LineBorder(new Color(245, 84, 10), 2);
-        //crudPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "CRUD", TitledBorder.CENTER, TitledBorder.CENTER, null, new Color(2, 139, 250))));
+        exportPanelBorder = new LineBorder(new Color(245, 84, 10), 2);
         GridBagLayout gridBagLayout = new GridBagLayout();
         GridBagConstraints constraints = new GridBagConstraints();
         crudPanel.setLayout(gridBagLayout);
@@ -220,7 +214,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         genderOther.setBackground(null);
         genderPanel.setBackground(null);
 
-        for (JTextField textField : textFieldArrayList) {
+        for (JTextField textField : textFieldArrayList)
+        {
             textField.setPreferredSize(new Dimension(0, 25));
         }
 
@@ -272,8 +267,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         constraints.gridwidth = 2;
         constraints.insets = new Insets(0, crudPanel.getWidth() / 4, 0, 0);
         constraints.gridy++;
-        JLabel l = new JLabel("<html><center>Use <font color=#AC56C3>Open DOB</font color>" + " Button to select a " +
-                "DOB</center></html>");
+        JLabel l = new JLabel("<html><center>Use <font color=#AC56C3>Open DOB</font color>" + " Button to select a DOB</center></html>");
         //l.setFont(l.getFont().deriveFont(Font.ITALIC, , 12));
         gridBagLayout.setConstraints(l, constraints);
         crudPanel.add(l);
@@ -315,9 +309,9 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         crudPanel.add(clubLabel);
 
         constraints.gridx++;
-        gridBagLayout.setConstraints(jComboBox, constraints);
-        //jComboBox.setPreferredSize(new Dimension(200, 130));
-        crudPanel.add(jComboBox);
+        gridBagLayout.setConstraints(clubDropdownMenu, constraints);
+        //clubDropdownMenu.setPreferredSize(new Dimension(200, 130));
+        crudPanel.add(clubDropdownMenu);
 
         constraints.gridx = 0;
         constraints.gridy++;
@@ -357,26 +351,26 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
     private void settingExportPanel()
     {
-        border = new LineBorder(new Color(2, 139, 250), 2);
-        exportPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "Export Data"
+        exportPanelBorder = new LineBorder(new Color(2, 139, 250), 2);
+        exportPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(exportPanelBorder, "Export Data"
                 , TitledBorder.CENTER, TitledBorder.CENTER, null, new Color(245, 84, 10))));
 
         topScorerTextField.setEditable(false);
         infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 12));
 
-        getNationalitiesPerClub.addActionListener(this);
-        getGoalsPerAge.addActionListener(this);
-        getTopScorer.addActionListener(this);
+        nationalitiesPerClubButton.addActionListener(this);
+        goalsPerAgeButton.addActionListener(this);
+        topScorerButton.addActionListener(this);
 
         exportPanel.setLayout(new BoxLayout(exportPanel, BoxLayout.Y_AXIS));
         exportPanel.setBackground(null);
         exportPanel.setSize(200, 250);
         exportPanel.setLocation(800, 10);
-        exportPanel.add(getNationalitiesPerClub);
+        exportPanel.add(nationalitiesPerClubButton);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
-        exportPanel.add(getGoalsPerAge);
+        exportPanel.add(goalsPerAgeButton);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
-        exportPanel.add(getTopScorer);
+        exportPanel.add(topScorerButton);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
         exportPanel.add(topScorerTextField);
         exportPanel.add(Box.createRigidArea(new Dimension(10, 20)));
@@ -411,11 +405,11 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
         GridLayout experimentLayout = new GridLayout(5, 0);
         experimentLayout.setVgap(5);
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(null);
-        p.setSize(200, 260);
-        p.setLocation(550, 25);
-//        p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(border, "Export Data",
+        crudButtonPanel.setLayout(new BoxLayout(crudButtonPanel, BoxLayout.Y_AXIS));
+        crudButtonPanel.setBackground(null);
+        crudButtonPanel.setSize(200, 260);
+        crudButtonPanel.setLocation(550, 25);
+//        crudButtonPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(exportPanelBorder, "Export Data",
 //                TitledBorder.CENTER, TitledBorder.CENTER, null, Color.red)));
 
         insertButton.addActionListener(this);
@@ -424,160 +418,81 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         clearButton.addActionListener(this);
         dobPicker.addActionListener(this);
 
-        p.add(insertButton);
-        p.add(Box.createRigidArea(new Dimension(0, 15)));
-        p.add(updateButton);
-        p.add(Box.createRigidArea(new Dimension(0, 15)));
-        p.add(deleteButton);
-        p.add(Box.createRigidArea(new Dimension(0, 15)));
-        p.add(clearButton);
-        p.add(Box.createRigidArea(new Dimension(0, 15)));
-        p.add(dobPicker);
-        p.add(Box.createRigidArea(new Dimension(0, 15)));
-        p.add(new JLabel("<html><h3>Note: Select player_id to fill the textfields.</h3></html>"));
+        crudButtonPanel.add(insertButton);
+        crudButtonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        crudButtonPanel.add(updateButton);
+        crudButtonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        crudButtonPanel.add(deleteButton);
+        crudButtonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        crudButtonPanel.add(clearButton);
+        crudButtonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        crudButtonPanel.add(dobPicker);
+        crudButtonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        crudButtonPanel.add(new JLabel("<html><h3>Note: Select player_id to fill the textfields.</h3></html>"));
     }
 
-//    private CategoryDataset createDatasetForData1() throws SQLException
-//    {
-//        final String fiat = "FIAT";
-//        final String audi = "AUDI";
-//        final String ford = "FORD";
-//        final String club = "Club";
-//        final String millage = "Millage";
-//        final String userrating = "User Rating";
-//        final String safety = "safety";
-//        final DefaultCategoryDataset dataset =
-//                new DefaultCategoryDataset();
-//
-//        ArrayList<String> listOfClubs = new ArrayList<>();
-//
-//        cmd = "select club from players;";
-//
-//        try {
-//            rs = stmt.executeQuery(cmd);
-//            while (rs.next()) {
-//                listOfClubs.add(rs.getString("club"));
-//            }
-////            while (rs.next()) {
-////                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
-////            }
-//        } catch (Exception e1) {
-//            e1.printStackTrace();
-//        }
-//
-//
-//        cmd = "select club, count(nationality) from players group by club;";
-//        int count = 0;
-//
-//        try {
-//            rs = stmt.executeQuery(cmd);
-//            while (rs.next()) {
-//                count = Integer.parseInt(rs.getString("count(nationality)"));
-//                System.out.println(count);
-//                dataset.addValue(count, rs.getString("club"), club);
-//            }
-//        } catch (Exception e1) {
-//            e1.printStackTrace();
-//        }
-//
-//
-//        return dataset;
-//    }
-//
-//    private CategoryDataset createDatasetForData2() throws SQLException
-//    {
-//        final String fiat = "FIAT";
-//        final String audi = "AUDI";
-//        final String ford = "FORD";
-//        final String playerAge = "Player Age";
-//        final String millage = "Millage";
-//        final String userrating = "User Rating";
-//        final String safety = "safety";
-//        final DefaultCategoryDataset dataset =
-//                new DefaultCategoryDataset();
-//
-//        ArrayList<String> listOfClubs = new ArrayList<>();
-//
-//        cmd = "select age from players;";
-//
-//        try {
-//            rs = stmt.executeQuery(cmd);
-//            while (rs.next()) {
-//                listOfClubs.add(rs.getString("age"));
-//            }
-////            while (rs.next()) {
-////                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
-////            }
-//        } catch (Exception e1) {
-//            e1.printStackTrace();
-//        }
-//
-//
-//        cmd = "select age, goals from players group by age;";
-//        int count = 0;
-//
-//        try {
-//            rs = stmt.executeQuery(cmd);
-//            while (rs.next()) {
-//                count = Integer.parseInt(rs.getString("goals"));
-//                System.out.println(rs.getString("goals") + " = " +  rs.getString("age"));
-//                dataset.addValue(count, rs.getString("age"), playerAge);
-//            }
-//        } catch (Exception e1) {
-//            e1.printStackTrace();
-//        }
-//
-//        return dataset;
-//    }
-
-    public void openData1Frame() throws SQLException, IOException
+    public void openNationalitiesPerClubChart() throws SQLException, IOException
     {
         JFrame frame = new JFrame();
 
-        Statement statement = con.createStatement( );
-        ResultSet resultSet = statement.executeQuery("select club, count(nationality) from players group by club;" );
-        DefaultPieDataset dataset = new DefaultPieDataset( );
+        Statement statement = con.createStatement();
+        ResultSet resultSet = statement.executeQuery("select club, count(distinct nationality) as nationality from players group by club;");
+        DefaultPieDataset dataset = new DefaultPieDataset();
 
-        while( resultSet.next( ) ) {
+        while (resultSet.next())
+        {
             dataset.setValue(
-                    resultSet.getString( "club" ) ,
-                    Double.parseDouble( resultSet.getString( "count(nationality)" ))
+                    resultSet.getString("club"),
+                    Double.parseDouble(resultSet.getString("nationality"))
             );
         }
-//        PieSectionLabelGenerator labelGenerator = new StandardPieSectionLabelGenerator("{0} = {1}");
         JFreeChart chart = ChartFactory.createPieChart(
                 "Nationalities Per Club",   // chart title
                 dataset,          // data
                 true,             // include legend
                 true,
-                false );
+                false);
         ChartPanel chartPanel = new ChartPanel(chart);
         PiePlot plot = (PiePlot) chart.getPlot();
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
         chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
+
         frame.add(chartPanel);
         frame.setSize(700, 500);
         frame.setLocation(content.getWidth(), content.getHeight());
         frame.setVisible(true);
 
-        int width = 560;    /* Width of the image */
-        int height = 370;   /* Height of the image */
-        File pieChart = new File( "Data 1.jpeg" );
-        ChartUtilities.saveChartAsJPEG( pieChart , chart , width , height );
+
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Specify a file to save");
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpeg"));
+
+        fileChooser.setAcceptAllFileFilterUsed(true);
+        int userSelection = fileChooser.showSaveDialog(frame);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = new File(fileChooser.getSelectedFile() + ".jpeg");
+            System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+            int width = 560;    /* Width of the image */
+            int height = 370;   /* Height of the image */
+            ChartUtilities.saveChartAsJPEG(fileToSave, chart, width, height);    // saves chart as jpeg file
+        }
     }
 
-    public void openData2Frame() throws SQLException, IOException
+    public void openGoalsPerAgeChart() throws SQLException, IOException
     {
         JFrame frame = new JFrame();
 
-        Statement statement = con.createStatement( );
-        ResultSet resultSet = statement.executeQuery("select age, goals from players group by age;" );
-        DefaultPieDataset dataset = new DefaultPieDataset( );
+        Statement statement = con.createStatement();
+        ResultSet resultSet = statement.executeQuery("select age, sum(goals) as goals from players group by age;");
+        DefaultPieDataset dataset = new DefaultPieDataset();
 
-        while( resultSet.next( ) ) {
+        while (resultSet.next())
+        {
             dataset.setValue(
-                    resultSet.getString( "age" ) ,
-                    Double.parseDouble( resultSet.getString( "goals" ))
+                    resultSet.getString("age"),
+                    Double.parseDouble(resultSet.getString("goals"))
             );
         }
 //        PieSectionLabelGenerator labelGenerator = new StandardPieSectionLabelGenerator("{0} = {1}");
@@ -586,20 +501,32 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                 dataset,          // data
                 true,             // include legend
                 true,
-                false );
+                false);
         ChartPanel chartPanel = new ChartPanel(chart);
         PiePlot3D plot = (PiePlot3D) chart.getPlot();
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
+        plot.setStartAngle(60);
         chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
         frame.add(chartPanel);
         frame.setSize(700, 500);
         frame.setLocation(content.getWidth(), content.getHeight());
         frame.setVisible(true);
 
-        int width = 560;    /* Width of the image */
-        int height = 370;   /* Height of the image */
-        File pieChart = new File( "Data 2.jpeg" );
-        ChartUtilities.saveChartAsJPEG( pieChart , chart , width , height );
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Specify a file to save");
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpeg"));
+
+        fileChooser.setAcceptAllFileFilterUsed(true);
+        int userSelection = fileChooser.showSaveDialog(frame);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = new File(fileChooser.getSelectedFile() + ".jpeg");
+            System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+            int width = 560;    /* Width of the image */
+            int height = 370;   /* Height of the image */
+            ChartUtilities.saveChartAsJPEG(fileToSave, chart, width, height);    // saves chart as jpeg file
+        }
+
     }
 
     @Override
@@ -607,141 +534,143 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     {
         Object target = e.getSource();
 
-        if (target == getTopScorer) {
-            try {
-                String updateTemp = "call spGetTopScorer();";
-                rs = stmt.executeQuery(updateTemp);
-                while(rs.next())
-                {
-                    System.out.println("FirstName = "+rs.getString("firstName"));
-                    System.out.println("LastName = "+rs.getString("lastName"));
-                    System.out.println("Goals Scored = "+rs.getString("goals"));
-                    topScorerTextField.setText(rs.getString("firstName") + " " + rs.getString("lastName") + " (" + rs.getString("goals") + ")");
-                }
-
-            } catch (SQLException sqle) {
-                System.err.println("Error with delete:\n" + sqle.toString());
-            } finally {
-                tableModel.refreshFromDB(stmt);
-            }
+        if (target == topScorerButton)
+        {
+            getTopScorer();
         }
 
-        if (target == jComboBox) {
-            System.out.println(jComboBox.getItemAt(jComboBox.getSelectedIndex()));
+        if (target == clubDropdownMenu)
+        {
+            System.out.println(clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex()));
         }
 
-        // open calendar on 'open DOB' button and sets DOB date in DOB text-field
-        if (target == dobPicker) {
-            JFrame f = new JFrame();
-            JPanel p = new JPanel();
-            JCalendar calendar = new JCalendar();
-            JLabel label = new JLabel();
-            date.replaceAll("\\D", "");
-            SimpleDateFormat dcn = new SimpleDateFormat("yyyy");
-            SimpleDateFormat actualFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-            calendar.addPropertyChangeListener(new PropertyChangeListener()
-            {
-
-                @Override
-                public void propertyChange(PropertyChangeEvent evt)
-                {
-                    // TODO Auto-generated method stub
-                    date = dcn.format(calendar.getDate());
-                    label.setText(date.toString());
-
-                    dobTextField.setText(actualFormat.format(calendar.getDate()));
-
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy");
-                    LocalDateTime now = LocalDateTime.now();
-                    String nowDate = dtf.format(now);
-                    date = date.replaceAll("[^a-zA-Z0-9]", "");
-                    //System.out.println(date);
-                    int age = Integer.parseInt(nowDate) - Integer.parseInt(date);
-                    //System.out.println(age);
-                    ageSpinner.setValue(age);
-                }
-            });
-            p.add(calendar);
-            p.add(label);
-            f.add(p);
-            f.setVisible(true);
-            f.setSize(600, 600);
-            dobTextField.setText(date);
-            f.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        // open calendar on 'open DOB' button and sets DOB dobDate in DOB text-field
+        if (target == dobPicker)
+        {
+            openDOBPicker();
         }
 
-        if (target == getNationalitiesPerClub) {
+        if (target == nationalitiesPerClubButton)
+        {
             GetNationalitiesPerClub();
         }
 
-        if (target == getGoalsPerAge) {
+        if (target == goalsPerAgeButton)
+        {
             GetGoalsPerAge();
         }
 
-        if (target == clearButton) {
-            clearFields();
+        if (target == clearButton)
+        {
+            clearFields();  // clears all fields to default value
         }
 
-        if (target == insertButton) {
+        if (target == insertButton)
+        {
             insertQuery();  // method that runs insert query
-            //DisplayDBTable();
         }
-        if (target == deleteButton) {
+        if (target == deleteButton)
+        {
             deleteQuery();  // method that runs delete query
-            //DisplayDBTable();
         }
-        if (target == updateButton) {
+        if (target == updateButton)
+        {
             updateQuery();  // method that runs the update query
         }
+    }
+
+    private void openDOBPicker()
+    {
+        JFrame f = new JFrame();
+        JPanel p = new JPanel();
+        JCalendar calendar = new JCalendar();
+        JLabel label = new JLabel();
+        dobDate.replaceAll("\\D", "");
+        SimpleDateFormat dcn = new SimpleDateFormat("yyyy");
+        SimpleDateFormat actualFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        calendar.addPropertyChangeListener(new PropertyChangeListener()
+        {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt)
+            {
+                // TODO Auto-generated method stub
+                dobDate = dcn.format(calendar.getDate());
+                label.setText(dobDate.toString());
+
+                dobTextField.setText(actualFormat.format(calendar.getDate()));
+
+                // sets date format from YYYY-MM-DD to YYYY, for easy calculation of age
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy");
+                LocalDateTime now = LocalDateTime.now();
+                String nowDate = dtf.format(now);
+                dobDate = dobDate.replaceAll("[^a-zA-Z0-9]", "");
+                //System.out.println(dobDate);
+                int age = Integer.parseInt(nowDate) - Integer.parseInt(dobDate);    // calculates player age based on DOB
+                //System.out.println(age);
+                ageSpinner.setValue(age);
+            }
+        });
+        p.add(calendar);
+        p.add(label);
+        f.add(p);
+        f.setVisible(true);
+        f.setSize(600, 600);
+        dobTextField.setText(dobDate);
+        f.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     private void updateQuery()
     {
         String updateTemp = "";
-        try {
-
-            if (genderFemale.isSelected() == true) {
+        try
+        {
+            if (genderFemale.isSelected() == true)
+            {
                 updateTemp = "UPDATE players SET " + "firstName = '" + firstNameTextField.getText()
                         + "', lastName = '" + lastNameTextField.getText() + "', age = " + ageSpinner.getValue()
                         + ", gender ='F'" + ", dob = '" + dobTextField.getText() + "', nationality = '"
-                        + nationalityTextField.getText() + "', club = '" + jComboBox.getItemAt(jComboBox.getSelectedIndex())
+                        + nationalityTextField.getText() + "', club = '" + clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex())
                         + "', appearances = " + appearancesTextField.getText() + ", goals = "
                         + goalsTextField.getText() + ", assists = " + assistsTextField.getText()
                         + " where player_id = " + idTextField.getText() + ";";
             }
 
-            if (genderMale.isSelected() == true) {
+            if (genderMale.isSelected() == true)
+            {
                 updateTemp = "UPDATE players SET " + "firstName = '" + firstNameTextField.getText()
                         + "', lastName = '" + lastNameTextField.getText() + "', age = " + ageSpinner.getValue()
                         + ", gender ='M'" + ", dob = '" + dobTextField.getText() + "', nationality = '"
-                        + nationalityTextField.getText() + "', club = '" + jComboBox.getItemAt(jComboBox.getSelectedIndex())
+                        + nationalityTextField.getText() + "', club = '" + clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex())
                         + "', appearances = " + appearancesTextField.getText() + ", goals = "
                         + goalsTextField.getText() + ", assists = " + assistsTextField.getText()
                         + " where player_id = " + idTextField.getText() + ";";
             }
 
-            if (genderOther.isSelected() == true) {
+            if (genderOther.isSelected() == true)
+            {
                 updateTemp = "UPDATE players SET " + "firstName = '" + firstNameTextField.getText()
                         + "', lastName = '" + lastNameTextField.getText() + "', age = " + ageSpinner.getValue()
                         + ", gender ='O'" + ", dob = '" + dobTextField.getText() + "', nationality = '"
-                        + nationalityTextField.getText() + "', club = '" + jComboBox.getItemAt(jComboBox.getSelectedIndex())
+                        + nationalityTextField.getText() + "', club = '" + clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex())
                         + "', appearances = " + appearancesTextField.getText() + ", goals = "
                         + goalsTextField.getText() + ", assists = " + assistsTextField.getText()
                         + " where player_id = " + idTextField.getText() + ";";
             }
 
             stmt.executeUpdate(updateTemp);
-            // these lines do nothing but the table updates when we access the db.
             rs = stmt.executeQuery("SELECT * from players");
             rs.next();
             rs.close();
 
-            printDB();
+            //printDB();
 
-        } catch (SQLException sqle) {
+        } catch (SQLException sqle)
+        {
             System.err.println("Error with  update:\n" + sqle.toString());
-        } finally {
+        } finally
+        {
             tableModel.refreshFromDB(stmt);
         }
         clearFields();  // clears all input-based components
@@ -749,20 +678,18 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
     private void deleteQuery()
     {
-        try {
+        try
+        {
             String updateTemp = "DELETE FROM players WHERE player_id = " + idTextField.getText() + ";";
             stmt.executeUpdate(updateTemp);
 
-        } catch (SQLException sqle) {
+        } catch (SQLException sqle)
+        {
             System.err.println("Error with delete:\n" + sqle.toString());
-        } finally {
+        } finally
+        {
             tableModel.refreshFromDB(stmt);
-            try {
-                printDB();
-            } catch (SQLException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+            //printDB();
 
         }
         clearFields();  // clears all input-based components
@@ -771,43 +698,44 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
     private void insertQuery()
     {
         String updateTemp = "";
-        try {
-            if (genderFemale.isSelected() == true) {
+        try
+        {
+            if (genderFemale.isSelected() == true)
+            {
                 updateTemp = "INSERT INTO players VALUES(" + null + ", '" + firstNameTextField.getText() + "', "
                         + "'" + lastNameTextField.getText() + "', " + ageSpinner.getValue() + ", " + "'F', " + "'"
                         + dobTextField.getText() + "', " + "'" + nationalityTextField.getText() + "', " + "'"
-                        + jComboBox.getItemAt(jComboBox.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
+                        + clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
                         + goalsTextField.getText() + ", " + assistsTextField.getText() + ");";
             }
 
-            if (genderMale.isSelected() == true) {
+            if (genderMale.isSelected() == true)
+            {
                 updateTemp = "INSERT INTO players VALUES(" + null + ", '" + firstNameTextField.getText() + "', "
                         + "'" + lastNameTextField.getText() + "', " + ageSpinner.getValue() + ", " + "'M', " + "'"
                         + dobTextField.getText() + "', " + "'" + nationalityTextField.getText() + "', " + "'"
-                        + jComboBox.getItemAt(jComboBox.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
+                        + clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
                         + goalsTextField.getText() + ", " + assistsTextField.getText() + ");";
             }
 
-            if (genderOther.isSelected() == true) {
+            if (genderOther.isSelected() == true)
+            {
                 updateTemp = "INSERT INTO players VALUES(" + null + ", '" + firstNameTextField.getText() + "', "
                         + "'" + lastNameTextField.getText() + "', " + ageSpinner.getValue() + ", " + "'O', " + "'"
                         + dobTextField.getText() + "', " + "'" + nationalityTextField.getText() + "', " + "'"
-                        + jComboBox.getItemAt(jComboBox.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
+                        + clubDropdownMenu.getItemAt(clubDropdownMenu.getSelectedIndex()) + "', " + appearancesTextField.getText() + ", "
                         + goalsTextField.getText() + ", " + assistsTextField.getText() + ");";
             }
 
             stmt.executeUpdate(updateTemp);
 
-        } catch (SQLException sqle) {
+        } catch (SQLException sqle)
+        {
             System.err.println("Error with  insert:\n" + sqle.toString());
-        } finally {
+        } finally
+        {
             tableModel.refreshFromDB(stmt);
-            try {
-                printDB();
-            } catch (SQLException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+            //printDB();
         }
         clearFields();  // clears all input-based components
     }
@@ -824,14 +752,14 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         genderOther.setSelected(false);
         dobTextField.setText("");
         nationalityTextField.setText("");
-        clubTextField.setText("");
         appearancesTextField.setText("");
         goalsTextField.setText("");
         assistsTextField.setText("");
         infoLabel.setText("Info = ");
+        clubDropdownMenu.setSelectedIndex(0);
     }
 
-    private void printDB() throws SQLException
+/*    private void printDB() throws SQLException
     {
         rs = stmt.executeQuery("call spGetTopScorer();");
 
@@ -848,7 +776,7 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
                     + " | ");
 
         rs.close();
-    }
+    }*/
 
     /*
      * TYPE OF EXPORT DATA I CAN GET
@@ -858,59 +786,95 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
     private void GetNationalitiesPerClub()
     {
-        cmd = "select club, count(nationality) from players group by club;";
+        cmd = "select club, count(distinct nationality) from players group by club;";
 
-        try {
+        try
+        {
             rs = stmt.executeQuery(cmd);
-            writeToFile(rs, "ExportData1");
-//            while (rs.next()) {
-//                System.out.println(rs.getString("club") + " = " + rs.getString("count(nationality)"));
-//            }
-        } catch (Exception e1) {
+            writeToFile(rs, "ExportData - Nationalities Per Club");
+        } catch (Exception e1)
+        {
             e1.printStackTrace();
         }
     }
 
     private void GetGoalsPerAge()
     {
-        cmd = "select age, count(goals) from players group by age;";
+        cmd = "select age, sum(goals) as goals from players group by age;";
 
-        try {
+        try
+        {
             rs = stmt.executeQuery(cmd);
-            writeToFile(rs, "ExportData2");
-//            while (rs.next()) {
-//                System.out.println(rs.getString("age") + " = " + rs.getString("count(goals)"));
-//            }
-        } catch (Exception e1) {
+            writeToFile(rs, "ExportData - Goals Per Age");
+        } catch (Exception e1)
+        {
             e1.printStackTrace();
+        }
+    }
+
+
+    private void getTopScorer()
+    {
+        try {
+            String updateTemp = "call spGetTopScorer();";
+            rs = stmt.executeQuery(updateTemp);
+            while(rs.next())
+            {
+//                System.out.println("FirstName = "+rs.getString("firstName"));
+//                System.out.println("LastName = "+rs.getString("lastName"));
+//                System.out.println("Goals Scored = "+rs.getString("goals"));
+                topScorerTextField.setText(rs.getString("firstName") + " " + rs.getString("lastName") + " (" + rs.getString("goals") + ")");
+            }
+
+        } catch (SQLException sqle) {
+            System.err.println("Error with delete:\n" + sqle.toString());
+        } finally {
+            tableModel.refreshFromDB(stmt);
         }
     }
 
     private void writeToFile(ResultSet rs, String fileName)
     {
-        try {
-            //System.out.println("writing to csv file...");
-            infoLabel.setText("Info = writing to csv file...");
-            FileWriter outputFile = new FileWriter("Export Data/" + fileName + ".csv");
+        try
+        {
+            //System.out.println("In writeToFile");
+            JFileChooser fileChooser = new JFileChooser();
+            FileWriter outputFile = null;
+
+
+
+            fileChooser.setDialogTitle("Specify a file to save");
+            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV File", ".csv"));
+
+            fileChooser.setAcceptAllFileFilterUsed(true);
+            int userSelection = fileChooser.showSaveDialog(null);
+
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = new File(fileChooser.getSelectedFile() + ".csv");
+                System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+                outputFile = new FileWriter(fileToSave);
+            }
             PrintWriter printWriter = new PrintWriter(outputFile);
             ResultSetMetaData rsmd = rs.getMetaData();
             int numColumns = rsmd.getColumnCount();
 
-            for (int i = 0; i < numColumns; i++) {
+            for (int i = 0; i < numColumns; i++)
+            {
                 printWriter.print(rsmd.getColumnLabel(i + 1) + ",");
             }
             printWriter.print("\n");
-            while (rs.next()) {
-                for (int i = 0; i < numColumns; i++) {
+            while (rs.next())
+            {
+                for (int i = 0; i < numColumns; i++)
+                {
                     printWriter.print(rs.getString(i + 1) + ",");
                 }
                 printWriter.print("\n");
                 printWriter.flush();
             }
             printWriter.close();
-            //System.out.println("writing to csv file...DONE");
-            infoLabel.setText("Info = writing to csv file...DONE");
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -933,7 +897,8 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
         // fills text-fields when clicked on an id column in db table
 
-        if (tableofDBContents.getSelectedColumn() == 0) {
+        if (tableofDBContents.getSelectedColumn() == 0)
+        {
             idTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 0).toString());
             firstNameTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 1).toString());
             lastNameTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 2).toString());
@@ -948,14 +913,14 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
             nationalityTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 6).toString());
             String s = tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 7).toString();
 
-            for (int i = 0; i <= optionsToChoose.length - 1; i++) {
-                if (s.equals(optionsToChoose[i])) {
+            for (int i = 0; i <= clubs.length - 1; i++)
+            {
+                if (s.equals(clubs[i]))
+                {
                     System.out.println("YES!! SAME");
-                    jComboBox.setSelectedIndex(i);
+                    clubDropdownMenu.setSelectedIndex(i);
                 }
             }
-
-
             appearancesTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 8).toString());
             goalsTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 9).toString());
             assistsTextField.setText(tableofDBContents.getValueAt(tableofDBContents.getSelectedRow(), 10).toString());
