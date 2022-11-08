@@ -20,7 +20,7 @@ CREATE TABLE players (
 	assists INTEGER NOT NULL
     );
     
-/*2. Inserting Data*/
+/*3. Inserting Data*/
 SELECT 'INSERTING DATA INTO DATABASE' as 'INFO';
 
 INSERT INTO players VALUES (null, 'Mohamed', 'Salah', 30, 'M', '1992-07-15'

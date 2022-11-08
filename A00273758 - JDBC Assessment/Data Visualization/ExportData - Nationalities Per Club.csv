@@ -1,0 +1,8 @@
+club,count(distinct nationality),
+Arsenal,1,
+Crystal Palace,1,
+Leicester City,1,
+Liverpool,2,
+Manchester City,2,
+Nottingham Forest,1,
+Tottenham Hotspur,2,
