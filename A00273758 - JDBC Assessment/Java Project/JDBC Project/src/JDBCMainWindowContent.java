@@ -3,27 +3,13 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.chart.labels.ItemLabelAnchor;
-import org.jfree.chart.labels.ItemLabelPosition;
-import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PiePlot3D;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.CategoryItemRenderer;
-import org.jfree.data.Range;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.ui.TextAnchor;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -506,15 +492,15 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         ChartPanel chartPanel = new ChartPanel(nationalitiesChart);
         PiePlot plot = (PiePlot) nationalitiesChart.getPlot();
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
-        chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
+        chartPanel.setPreferredSize(new Dimension(700, 500));
         nationalitiesFrame.setTitle("Nationalities Frame");
         nationalitiesFrame.add(chartPanel);
         nationalitiesFrame.setSize(700, 500);
         nationalitiesFrame.setLocation(content.getWidth(), content.getHeight());
         nationalitiesFrame.setVisible(true);
-        nationalitiesFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+        nationalitiesFrame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosing(WindowEvent windowEvent) {
                 // allows user to choose where to save the jpeg file
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Specify a file to save");
@@ -564,15 +550,15 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         PiePlot3D plot = (PiePlot3D) goalsChart.getPlot();
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1}"));
         plot.setStartAngle(60);
-        chartPanel.setPreferredSize(new java.awt.Dimension(700, 500));
+        chartPanel.setPreferredSize(new Dimension(700, 500));
         goalsFrame.setTitle("Goals Frame");
         goalsFrame.add(chartPanel);
         goalsFrame.setSize(700, 500);
         goalsFrame.setLocation(content.getWidth(), content.getHeight());
         goalsFrame.setVisible(true);
-        goalsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+        goalsFrame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosing(WindowEvent windowEvent) {
                 // allows user to choose where to save the jpeg file
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Specify a file to save");
@@ -778,30 +764,6 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
         clubDropdownMenu.setSelectedIndex(0);
     }
 
-/*    private void printDB() throws SQLException
-    {
-        rs = stmt.executeQuery("call spGetTopScorer();");
-
-        System.out.println(" ");
-
-        System.out.println(
-                "| ID ! First Name | Last Name | Age | Gender | DOB | Nationality | Club | Apperances | Goals | Assists |");
-
-        while (rs.next())
-            System.out.println("|" + rs.getInt("player_id") + " | " + rs.getString("firstName") + " |  "
-                    + rs.getString("lastName") + " | " + rs.getString("age") + " | " + rs.getString("gender") + " | "
-                    + rs.getString("dob") + " | " + rs.getString("nationality") + " | " + rs.getString("club") + " | "
-                    + rs.getString("appearances") + " | " + rs.getString("goals") + " | " + rs.getString("assists")
-                    + " | ");
-
-        rs.close();
-    }*/
-
-    /*
-     * TYPE OF EXPORT DATA I CAN GET
-     * 1. All nationalities and clubs in 1 csv file, use charts to show diversity in each club.
-     * 2. Goals, Assists and Age in 1 csv file, use charts to show total goals scored or assists per age.
-     */
 
     private void GetNationalitiesPerClub()
     {
@@ -854,48 +816,27 @@ public class JDBCMainWindowContent extends JInternalFrame implements ActionListe
 
     private void writeToFile(ResultSet rs, String fileName)
     {
-        try
-        {
-            //System.out.println("In writeToFile");
-            JFileChooser fileChooser = new JFileChooser();
-            FileWriter outputFile = null;
-
-
-            // allows user to choose where to save the csv file
-            fileChooser.setDialogTitle("Specify a file to save");
-            fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV File", ".csv"));
-
-            fileChooser.setAcceptAllFileFilterUsed(true);
-            int userSelection = fileChooser.showSaveDialog(null);
-
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = new File(fileChooser.getSelectedFile() + ".csv");
-                System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-                outputFile = new FileWriter(fileToSave);
-            }
+        try{
+            System.out.println("In writeToFile");
+            FileWriter outputFile = new FileWriter("../../../A00273758 - JDBC Assessment/Data Visualization/"+fileName+".csv");
             PrintWriter printWriter = new PrintWriter(outputFile);
             ResultSetMetaData rsmd = rs.getMetaData();
             int numColumns = rsmd.getColumnCount();
 
-            for (int i = 0; i < numColumns; i++)
-            {
-                printWriter.print(rsmd.getColumnLabel(i + 1) + ",");
+            for(int i=0;i<numColumns;i++){
+                printWriter.print(rsmd.getColumnLabel(i+1)+",");
             }
             printWriter.print("\n");
-            while (rs.next())
-            {
-                for (int i = 0; i < numColumns; i++)
-                {
-                    printWriter.print(rs.getString(i + 1) + ",");
+            while(rs.next()){
+                for(int i=0;i<numColumns;i++){
+                    printWriter.print(rs.getString(i+1)+",");
                 }
                 printWriter.print("\n");
                 printWriter.flush();
             }
             printWriter.close();
-        } catch (Exception e)
-        {
-            e.printStackTrace();
         }
+        catch(Exception e){e.printStackTrace();}
     }
 
     @Override
